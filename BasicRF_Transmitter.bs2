@@ -1,0 +1,8 @@
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+' 2/18/2016 Alec M. (https://github.com/amattu)
+' Testing TRANSMITTER
+
+DO
+SEROUT 15, 9600, ["1"]      ' Send out a signal that says "1"
+LOOP

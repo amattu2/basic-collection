@@ -1,0 +1,19 @@
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+' 3/15/17 Alec M. (https://github.com/amattu)
+
+' Basic TESTING RECEIVER Revised
+
+' Keep receiver voltage under 5v else it will fry the thing.
+
+response VAR Word
+inpin    VAR Word
+beeppin  VAR Word
+
+inpin = 15                              ' The pin that the input connector is connected to.
+
+DO
+SERIN inpin, 9600, [response]           ' Takes the input and saves it.
+DEBUG CR, "Response:", " ", response    ' Shows the response.
+PAUSE 200
+LOOP

@@ -1,0 +1,37 @@
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+
+' Dual Sensor Test code
+
+'***************************
+' For sensor 1 (left)
+Echo_Pin1    CON   0        ' Echo Pin 0 (Sends chirp out)
+Trig_Pin1    CON   1        ' Listen Pin 1 (Hears chirp)
+InConstant1  CON   890
+inDistance1  VAR   Word     ' Distance in inches
+time1        VAR   Word     ' Time that the ultrasonic ping is out
+'***************************
+' For sensor 2 (right)
+Echo_Pin2    CON   2        ' Echo Pin 0 (Sends chirp out)
+Trig_Pin2    CON   3        ' Listen Pin 1 (Hears chirp)
+InConstant2  CON   890
+inDistance2  VAR   Word     ' Distance in inches
+time2        VAR   Word     ' Time that the ultrasonic ping is out
+'***************************
+'--------------------------------------------------------------------------------
+'***************************
+DO
+  PULSOUT Trig_Pin1, 5              ' Send short pulse to Ping
+  PULSIN Echo_Pin1, 1, time1         ' Wait for echo
+  inDistance1 = inConstant1 ** time1  ' Convert to inches
+  DEBUG CR, DEC inDistance1         ' Display result
+  PAUSE 200         ' Short delay until next read
+
+  PULSOUT Trig_Pin2, 5              ' Send short pulse to Ping
+  PULSIN Echo_Pin2, 1, time2         ' Wait for echo
+  inDistance2 = inConstant2 ** time2  ' Convert to inches
+  DEBUG CR, DEC inDistance2         ' Display result
+  PAUSE 200         ' Short delay until next read
+
+PAUSE 1000
+LOOP

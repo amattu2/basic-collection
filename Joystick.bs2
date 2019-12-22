@@ -1,0 +1,16 @@
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+
+
+LrPin   CON   15       ' Pin the i/o terminal is connected to.
+LR      VAR   Word     ' The var that the pin gives out.
+
+' this script doesn't work. dunno know why.
+
+DO
+  HIGH LrPin
+  PAUSE 2
+  RCTIME LrPin, 1, LR
+  DEBUG HOME, "Position = ", DEC LR, CLREOL
+  PAUSE 50
+LOOP

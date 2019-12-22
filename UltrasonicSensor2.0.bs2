@@ -1,0 +1,60 @@
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+' Code written by Alec M. (https://github.com/amattu)
+'---------------------------------------------------------------------------------------
+
+' Configuration Variables *Don't edit*
+Echo_Pin    CON   0        ' Echo (Sends chirp out)
+Trig_Pin    CON   1        ' Listen (Hears chirp)
+InConstant  CON   890
+inDistance  VAR   Word     ' Distance in inches
+time        VAR   Word     ' Time that the ultrasonic ping is out
+
+' Variables *Don't edit without modifying the code below*
+ftDistance  VAR   Word     ' inDistance // 12 = distance
+feet     VAR   Word        ' Decides feet or foot
+inch     VAR   Word        ' Decides inches or inch
+warn     VAR   Word        ' The distance at which it issues a warning on the debug/display
+
+' Variable setting *Edit for customization*
+feet(feet) = feet
+inch(inch) = inch
+warn = 24
+
+'---------------------------------------------------------------------------------------
+
+' Measuring (Distance, etc)
+beginning:                                               ' For GOTO (Please leave alone)
+DO
+  PULSOUT Trig_Pin, 5                                    ' Send short pulse to Ping
+  PULSIN Echo_Pin, 1, time                               ' Wait for distance response
+  inDistance = InConstant ** time                        ' Convert time to inches
+  ftDistance = inDistance / 12                           ' Convert inches to feet
+
+
+'---------------------------------------------------------------------------------------
+
+' Variable defining ( Feet = foot / Inch = inches, etc)    *currently disabled*
+'IF ((inDistance =<12)) THEN VAR feet ="foot": ENDIF
+IF ((ftDistance =<warn)) THEN DEBUG CR, DEC inDistance ELSE GOTO buzzer: ENDIF
+
+'---------------------------------------------------------------------------------------
+
+' Display managing (Decides whether or not to display the result.)
+'  DEBUG CR, DEC inDistance, " ", DEC inch                ' Display result
+'  DEBUG CR, "------------"                               ' A Line separating in & ft
+'  PAUSE 500                                              ' Wait before displaying in feet
+'  DEBUG CR, DEC ftDistance, " ", DEC feet                  ' Display result in ft
+'  DEBUG CR, "------------"                               ' A Line separating in & ft
+'  PAUSE 500                                              ' Short delay until next read
+
+'---------------------------------------------------------------------------------------
+buzzer:
+' Buzzer management
+  IF ((inDistance =<12)) THEN FREQOUT 4, 2000, 3000  ELSE GOTO beginning: ENDIF       ' If 12 inches or closer, sound the beeper (Would be used to alert the driver, not the vehicle ahead. Would need to be extended to like 5-10 ft)
+DEBUG CR, "----------------------------"
+DEBUG CR,    "Keep a safe distance!"
+DEBUG CR, "----------------------------"
+
+' Start over
+LOOP

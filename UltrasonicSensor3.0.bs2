@@ -1,0 +1,83 @@
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+' Code written by Alec M. (https://github.com/amattu)
+'---------------------------------------------------------------------------------------
+
+' Preset Variables *Don't edit
+Echo_Pin    CON   0        ' Echo (Sends chirp out)
+Trig_Pin    CON   1        ' Listen (Hears chirp)
+InConstant  CON   890
+inDistance  VAR   Word     ' Distance in inches
+time        VAR   Word     ' Time that the ultrasonic ping is out
+
+' Variables *Don't edit without modifying the code
+ftDistance  VAR   Word     ' inDistance // 12 = distance
+feet     VAR   Word        ' Decides feet or foot
+inch     VAR   Word        ' Decides inches or inch
+warn     VAR   Word        ' The distance at which it displays the distance on the debug/display
+beepdis  VAR   Word        ' The distance at which the module beeps.
+
+' Variable setting *Edit for customization
+feet = (feet)              ' *Broken atm
+inch = (inch)              ' *Broken atm
+warn = (24)                ' Default is "24" which means 24 inches. The number is in inches.
+beepdis = (12)             ' Default is "12" which means 12 inches. The number is in inches.
+
+'---------------------------------------------------------------------------------------
+
+' Initialize Screen
+initalize:                                                     ' Used to reboot if ever needed ("goto initalize")
+DO
+  DEBUG CR, "---------------------------"                      ' | Will Be Displayed on the LCD display when power is given to the device.
+  DEBUG CR, "Made By Alec (unviewed.net)"                      ' |
+  DEBUG CR, "---------------------------", CR                  ' |
+  PAUSE 500                                                    ' |
+  DEBUG CR, "Modules & Variables Created.."                    ' |
+  DEBUG CR, "Initializing completed..."                        ' |
+  PAUSE 1000
+
+'---------------------------------------------------------------------------------------
+
+' Measuring (Distance, etc)
+beginning:                                               ' For GOTO (Please leave alone)
+  PULSOUT Trig_Pin, 5                                    ' Send short pulse to Ping
+  PULSIN Echo_Pin, 1, time                               ' Wait for distance response
+  inDistance = InConstant ** time                        ' Convert time to inches
+  ftDistance = inDistance / 12                           ' Convert inches to feet
+
+'---------------------------------------------------------------------------------------
+' ** Module Disabled **
+
+' Variable defining ( Feet = foot / Inch = inches, etc)
+'IF ((ftDistance =<1)) THEN VAR feet ="foot": ENDIF
+'IF ((inDistance =>1)) THEN inch(("inches")) = (inches):  ENDIF
+
+' ** Module Disabled **
+'---------------------------------------------------------------------------------------
+
+' IF-Statement Manager (Decides which section to go to, and what to do.)
+IF ((inDistance =<warn)) THEN DEBUG CR, DEC inDistance ELSEIF ((inDistance =>warn)) THEN GOTO beginning: ENDIF             'If the object is within the variable "warn" then start displaying the distance. Else if it is out of the range, goto beginning and start again.
+
+'---------------------------------------------------------------------------------------
+' ** Module disabled **
+
+' Display managing (Decides whether or not to display the result.)
+'  DEBUG CR, DEC inDistance, " ", DEC inch                ' Display result
+'  DEBUG CR, "------------"                               ' A Line separating in & ft
+'  PAUSE 500                                              ' Wait before displaying in feet
+'  DEBUG CR, DEC ftDistance, " ", DEC feet                ' Display result in ft
+'  DEBUG CR, "------------"                               ' A Line separating in & ft
+'  PAUSE 500                                              ' Short delay until next read
+
+' ** Module disabled **
+'---------------------------------------------------------------------------------------
+
+alert:
+' Buzzer & Visual Alert management
+IF ((inDistance =<beepdis)) THEN FREQOUT 4, 2000, 3000 ELSE GOTO beginning: ENDIF       ' If 12 inches or closer (by default), sound the beeper (Would be used to alert the driver, not the vehicle ahead. Would need to be extended to like 5-10 ft)
+  DEBUG CR, "----------------------------"
+  DEBUG CR, "Stay back a few car lengths!"
+  DEBUG CR, "----------------------------"
+
+GOTO beginning                                                                          ' Used to avoid returning to the beginning of the DO-Loop and therefor avoiding the init screen.
+LOOP

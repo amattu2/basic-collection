@@ -1,0 +1,22 @@
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+' 2/18/2016 Alec M. (https://github.com/amattu)
+
+' Basic TESTING RECEIVER
+
+' Keep receiver voltage under 5v else it will fry the thing.
+
+response VAR Word
+inpin    VAR Word
+beeppin  VAR Word
+
+inpin = 15                              ' The pin that the input connector is connected to.
+beeppin = 10                            ' The pin that the piezeospeaker is on.
+
+
+DO
+SERIN inpin, 9600, [response]           ' Takes the input and saves it.
+DEBUG CR, "Response:", " ", response  ' Shows the response.
+IF ((response >=2)) THEN FREQOUT beeppin, 175, 3500: ENDIF
+PAUSE 500                               ' Reduces lag. As there is a lot.
+LOOP

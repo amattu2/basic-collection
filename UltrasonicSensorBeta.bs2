@@ -1,0 +1,130 @@
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+' Code written by Alec M. (https://github.com/amattu)
+
+'---------------------------------------------------------------------------------------
+'***************************************************************************************
+
+' Update summary: Beta (2/10/2016)   ** THIS IS A BETA SCRIPT. USED FOR TESTING ON UNCONFIRMED ITEMS**
+' - Now beeps at a more effective level when closer than desired distance
+' - If the distance infront of the sensor is 0 for more than 5 seconds, it will now shutdown.
+' - Some LED implemenations have been made.
+' - New variables: Beeppin, Ledpin1, Ledpin2, Ledpin3. This allows the configuration of the board easier.
+' - Reorganized a bit.
+' - Added variable warncnt, will need to expand upon once ready.
+' - Yellow light now comes on once within the range of "warn" instead of buzzer.
+' - Red light now comes on once within the range of "beepdis"
+' -
+
+' Personal note: THIS WILL NOT GO LIVE (V3.5) UNTIL LEDS ARE SETUP.
+'***************************************************************************************
+'---------------------------------------------------------------------------------------
+
+' Base Variables *Don't edit
+Echo_Pin    CON   0        ' Echo Pin 0 (Sends chirp out)
+Trig_Pin    CON   1        ' Listen Pin 1 (Hears chirp)
+InConstant  CON   890
+inDistance  VAR   Word     ' Distance in inches
+time        VAR   Word     ' Time that the ultrasonic ping is out
+
+' Variables *Don't edit without modifying the code
+ftDistance  VAR   Word     ' inDistance // 12 = distance
+feet     VAR   Word        ' Decides feet or foot
+inch     VAR   Word        ' Decides inches or inch
+warn     VAR   Word        ' The distance at which it displays the distance on the debug/display
+beepdis  VAR   Word        ' The distance at which the module beeps.
+warncnt  VAR   Word        ' The amount of times the buzzer indicator has gone off.
+
+' Pin Variables Below *Still don't edit without modifying code below.
+ledpin1   VAR   Word        ' Green LED's I/O pin #.
+ledpin2   VAR   Word        ' Yellow LED's I/O pin #.
+ledpin3   VAR   Word        ' Red LED's I/O pin #.
+ledpin4   VAR   Word        ' Purple LED's I/O pin #.
+beeppin   VAR   Word        ' The buzzer anode pin number.
+
+'---------------------------------------------------------------------------------------
+
+' Variable setting *Edit for customization
+feet = (feet)              ' *Broken atm - Will be used to define whether or not to use feet/foot
+inch = (inch)              ' *Broken atm -
+warn = (24)                ' Default is "24" which means 24 inches. The number is in inches.
+beepdis = (12)             ' Default is "12" which means 12 inches. The number is in inches.
+warncnt = (0)
+
+' Pin Variable setting *Don't edit without editing the actual pin
+ledpin1 = (4)              ' | Green  | Sets the pin that the LED anode/cathode is in. Instead of changing the whole script.
+ledpin2 = (0)              ' | Yellow |
+ledpin3 = (0)              ' | Red    |
+ledpin4 = (0)              ' | Purple |
+beeppin = (2)              ' The pin that the positve pin on our pionizer is plugged into.
+
+'---------------------------------------------------------------------------------------
+initalize:                                                     ' Used to reboot if ever needed ("goto initalize")
+
+' Initialize Screen
+DO                                                             ' Start of the DO-LOOP. This should only be started once the device is powered.
+ HIGH ledpin1                                                 ' Turns on the green LED
+  DEBUG CR, "---------------------------"                      ' | Will Be Displayed on the LCD display when power is given to the device.
+  DEBUG CR, "Made By Alec (unviewed.net)"                      ' |
+  DEBUG CR, "---------------------------", CR                  ' |
+ PAUSE 500                                                     ' |
+  DEBUG CR, "Modules & Variables Created.."                    ' |
+  FREQOUT beeppin, 175, 3500                                   ' Beeps to init
+  DEBUG CR, "Initializing completed..."                        ' |
+ LOW ledpin2: LOW ledpin3: LOW ledpin4                         ' Turns off the other LEDs
+ PAUSE 1000
+
+'---------------------------------------------------------------------------------------
+beginning:
+                                               ' For GOTO (Please leave alone)
+' Measuring (Distance, etc)
+  PULSOUT Trig_Pin, 5                                    ' Send short pulse to Ping
+  PULSIN Echo_Pin, 1, time                               ' Wait for distance response
+  inDistance = InConstant ** time                        ' Convert time to inches
+  ftDistance = inDistance / 12                           ' Convert inches to feet
+
+'---------------------------------------------------------------------------------------
+' ** Module Disabled **
+
+' Variable defining ( Feet = foot / Inch = inches, etc)
+'IF ((ftDistance =<1)) THEN VAR feet ="foot": ENDIF
+'IF ((inDistance =>1)) THEN inch(("inches")) = (inches):  ENDIF
+
+' ** Module Disabled **
+'---------------------------------------------------------------------------------------
+ifstatement:
+
+' IF-Statement Manager (Decides which section to go to, and what to do.)
+IF ((inDistance =<warn)) THEN LOW ledpin1: HIGH ledpin2: ELSEIF ((inDistance =>warn)) THEN HIGH ledpin1: GOTO beginning: ENDIF                     'If the object is within the variable "warn" then turn on the light. Else if it is out of the range, goto beginning and start again.
+IF ((inDistance =0)) THEN DEBUG CR, "Sensor disconnected or an interal error ocurred.": GOTO quit: ENDIF
+
+'---------------------------------------------------------------------------------------
+alert:
+
+' Buzzer & Visual Alert management
+IF ((inDistance =<beepdis)) THEN HIGH ledpin3: FREQOUT beeppin, 175, 3951: FREQOUT beeppin, 175, 3951: PAUSE 500: LOW ledpin3: ELSE GOTO beginning: ENDIF       ' If 12 inches or closer (by default), sound the beeper (Would be used to alert the driver, not the vehicle ahead. Would need to be extended to like 5-10 ft)
+  DEBUG CR, "--------------------------------"
+  DEBUG CR, "Please increase distance by ", DEC warn - inDistance, "in"                                                   ' Shows how much you need to back off in inches. Would be feet normally.
+  DEBUG CR, "--------------------------------"
+
+
+GOTO beginning                                                                                                             ' Used to avoid returning to the beginning of the DO-Loop and therefor avoiding the init screen.
+LOOP
+
+'---------------------------------------------------------------------------------------
+quit:
+
+' Script stopper.
+' A external portion where the script ends, incase of an issue.
+
+PAUSE 5000                         ' Wait 5 seconds to remeasure.
+
+  PULSOUT Trig_Pin, 5                                    ' Send short pulse to Ping
+  PULSIN Echo_Pin, 1, time                               ' Wait for distance response
+  inDistance = InConstant ** time                        ' Convert time to inches
+  ftDistance = inDistance / 12                           ' Convert inches to feet
+
+  IF ((inDistance =0)) THEN DEBUG CR, "Shutting down. Interal error ocurred.": HIGH ledpin4: ELSEIF ((indistance =>0)) THEN DEBUG CR, "Issue fixed": GOTO beginning: ENDIF ' If the sensor doesn't read, or something else, this will stop the device.
+  LOW ledpin4: FREQOUT beeppin, 175, 3500: PAUSE 500: HIGH ledpin4: FREQOUT beeppin, 175, 3500: LOW ledpin4
+
+END                                                       ' Ends the script. To void, simply restart device.

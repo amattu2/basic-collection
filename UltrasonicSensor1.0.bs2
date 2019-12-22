@@ -1,0 +1,22 @@
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+
+Echo_Pin    CON   0        ' Echo (Sends chirp out)
+Trig_Pin    CON   1        ' Listen (Hears chirp)
+InConstant  CON   890
+inDistance  VAR   Word
+time        VAR   Word
+
+beginning:
+DO
+  PULSOUT Trig_Pin, 5              ' Send short pulse to Ping
+  PULSIN Echo_Pin, 1, time         ' Wait for echo
+  inDistance = inConstant ** time  ' Convert to inches
+  DEBUG CR, DEC inDistance         ' Display result
+  PAUSE 200         ' Short delay until next read
+
+IF ((inDistance =<12)) THEN FREQOUT 4, 3000, 900 ELSE GOTO beginning: ENDIF       ' If 12 inches or closer, sound the beeper (Would be used to alert the driver, not the vehicle ahead. Would need to be extended to like 5-10 ft)
+DEBUG CR, "----------------------------"
+DEBUG CR, "Stay back a few car lengths!"
+DEBUG CR, "----------------------------"
+LOOP

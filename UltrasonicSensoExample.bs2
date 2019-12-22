@@ -1,0 +1,48 @@
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+
+' 2/14/2016 @1:37PM
+' By Alec M. (https://github.com/amattu)
+
+'*************************
+' Pin connections
+
+EchoPin    CON   0        ' The pin that the terminal "echo" is connected to. Pin 0 is default.
+TrigPin    CON   1        ' The pin that the terminal "trig" is connected to. Pin 1 is default.
+
+' Connect "GND" to ground / VSS
+' Connect "VCC" or "5+" to positive / VCC
+
+'*************************
+
+' Don't edit below.
+InConstant  CON   890
+inDistance  VAR   Word
+time        VAR   Word
+
+'*************************
+' The code below gets measurements.
+
+beginning:                         ' Simply used for "GOTO beginning"
+DO                                 ' Start of the loop.
+  PULSOUT TrigPin, 5               ' Send a 0.005 second pulse to Ping.
+  PULSIN EchoPin, 1, time          ' Listens for the echo.
+
+'*************************
+' Coversion (Time to inches)
+
+  inDistance = inConstant ** time  ' Convert time into inches. [inches = inConstant x time]
+
+'*************************
+' If statement.
+
+IF ((inDistance = 0)) THEN DEBUG CR, "Not connected properly!": GOTO beginning: ENDIF ' If the distance is "0" then something isn't connected. And goto the beginning to remeasure.
+
+'*************************
+' Display management
+
+  DEBUG CR, DEC inDistance, "in"         ' Display result in the debug terminal.
+  PAUSE 200                        ' A 0.2 second delay until next measurement.
+
+LOOP                               ' Start over.
+'*************************

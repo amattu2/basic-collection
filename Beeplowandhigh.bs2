@@ -1,0 +1,12 @@
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+
+beep VAR Word
+
+beep = 4 ' the pin the beeper is connected to
+
+
+FREQOUT beep, 175, 3951     ' High
+FREQOUT beep, 175, 3729     ' Low
+FREQOUT beep, 175, 3951     ' High
+FREQOUT beep, 175, 3729     ' Low

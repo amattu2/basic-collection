@@ -1,0 +1,14 @@
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+
+'Script
+DO
+DEBUG "pin should be on", CR
+ HIGH 15              ' Pin 15 on
+ PAUSE 1000
+DEBUG "should be off", CR
+ LOW 15               ' Pin 15 off
+ PAUSE 1000
+
+LOOP
+
